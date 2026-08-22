@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Attendance</h1>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="POST" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="course_id" class="form-label">Select Course</label>
+                <select class="form-select" id="course_id" name="course_id" required>
+                    <option value="">Choose...</option>
+                    {% for c in courses %}
+                    <option value="{{ c.id }}" {% if selected_course and selected_course.id == c.id %}selected{% endif %}>{{ c.code }} - {{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="date" class="form-label">Date</label>
+                <input type="date" class="form-control" id="date" name="date" value="{{ date.strftime('%Y-%m-%d') }}" required>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Load Students</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_course %}
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Mark Attendance for {{ selected_course.code }} on {{ date.strftime('%B %d, %Y') }}</h5>
+    </div>
+    <div class="card-body p-0">
+        <form method="POST">
+            <input type="hidden" name="course_id" value="{{ selected_course.id }}">
+            <input type="hidden" name="date" value="{{ date.strftime('%Y-%m-%d') }}">
+            <input type="hidden" name="mark_attendance" value="1">
+            
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.roll_no }}</td>
+                            <td>{{ student.name }}</td>
+                            <td>
+                                {% set existing_att = student.attendance_records|selectattr('date', 'equalto', date)|first %}
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="status_{{ student.id }}" id="present_{{ student.id }}" value="Present" {% if not existing_att or existing_att.status == 'Present' %}checked{% endif %}>
+                                    <label class="btn btn-outline-success btn-sm" for="present_{{ student.id }}">Present</label>
+                                    
+                                    <input type="radio" class="btn-check" name="status_{{ student.id }}" id="absent_{{ student.id }}" value="Absent" {% if existing_att and existing_att.status == 'Absent' %}checked{% endif %}>
+                                    <label class="btn btn-outline-danger btn-sm" for="absent_{{ student.id }}">Absent</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4">No students enrolled in this course.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if students %}
+            <div class="card-footer bg-white text-end">
+                <button type="submit" class="btn btn-success">Save Attendance</button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

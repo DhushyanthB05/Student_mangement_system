@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <a href="{{ url_for('reports.export_students') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i> Export Student Report</a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-people me-2"></i>Total Students</h5>
+                <p class="card-text display-4">{{ student_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-journal-text me-2"></i>Active Courses</h5>
+                <p class="card-text display-4">{{ course_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-building me-2"></i>Departments</h5>
+                <p class="card-text display-4">{{ dept_count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Students by Department</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Grade Distribution</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="gradeChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Department Chart
+    const deptCtx = document.getElementById('deptChart');
+    new Chart(deptCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ dept_labels | tojson }},
+            datasets: [{
+                label: 'Students',
+                data: {{ dept_data | tojson }},
+                backgroundColor: ['#0d6efd', '#198754', '#0dcaf0', '#ffc107', '#dc3545']
+            }]
+        }
+    });
+
+    // Grade Chart
+    const gradeCtx = document.getElementById('gradeChart');
+    new Chart(gradeCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ grade_labels | tojson }},
+            datasets: [{
+                label: 'Number of Students',
+                data: {{ grade_data | tojson }},
+                backgroundColor: '#6f42c1'
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}
