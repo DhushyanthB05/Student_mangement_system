@@ -1,3 +1,4 @@
+﻿from app.routes.auth import admin_required
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app.extensions import db
@@ -8,6 +9,7 @@ bp = Blueprint('courses', __name__)
 
 @bp.route('/')
 @login_required
+@admin_required
 def list_courses():
     courses = Course.query.all()
     departments = Department.query.all()
@@ -15,6 +17,7 @@ def list_courses():
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_course():
     form = CourseForm()
     form.department_id.choices = [(d.id, d.name) for d in Department.query.all()]
@@ -38,6 +41,7 @@ def add_course():
 
 @bp.route('/departments/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_department():
     form = DepartmentForm()
     if form.validate_on_submit():
@@ -52,3 +56,4 @@ def add_department():
         return redirect(url_for('courses.list_courses'))
         
     return render_template('courses/add_department.html', form=form)
+

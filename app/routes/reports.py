@@ -1,3 +1,4 @@
+﻿from app.routes.auth import admin_required
 from flask import Blueprint, make_response
 from flask_login import login_required
 from app.models.models import Student
@@ -8,6 +9,7 @@ bp = Blueprint('reports', __name__)
 
 @bp.route('/students.csv')
 @login_required
+@admin_required
 def export_students():
     si = StringIO()
     cw = csv.writer(si)
@@ -24,3 +26,4 @@ def export_students():
     output.headers["Content-Disposition"] = "attachment; filename=students_report.csv"
     output.headers["Content-type"] = "text/csv"
     return output
+

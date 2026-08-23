@@ -1,3 +1,4 @@
+﻿from app.routes.auth import admin_required
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app.extensions import db
@@ -8,6 +9,7 @@ bp = Blueprint('attendance', __name__)
 
 @bp.route('/', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def index():
     courses = Course.query.all()
     selected_course = None
@@ -42,3 +44,4 @@ def index():
             flash('Attendance marked successfully!', 'success')
             
     return render_template('attendance/index.html', courses=courses, selected_course=selected_course, date=date, students=students)
+

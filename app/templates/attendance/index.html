@@ -8,6 +8,7 @@
 <div class="card shadow-sm mb-4">
     <div class="card-body">
         <form method="POST" class="row g-3 align-items-end">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="col-md-5">
                 <label for="course_id" class="form-label">Select Course</label>
                 <select class="form-select" id="course_id" name="course_id" required>
@@ -35,6 +36,7 @@
     </div>
     <div class="card-body p-0">
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="course_id" value="{{ selected_course.id }}">
             <input type="hidden" name="date" value="{{ date.strftime('%Y-%m-%d') }}">
             <input type="hidden" name="mark_attendance" value="1">

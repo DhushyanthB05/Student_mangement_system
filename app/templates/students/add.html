@@ -1,60 +1,56 @@
-{% extends "base.html" %}
-
+﻿{% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Add New Student</h1>
-    <a href="{{ url_for('students.list_students') }}" class="btn btn-outline-secondary">Cancel</a>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <form method="POST">
+<div class="row justify-content-center pt-4">
+    <div class="col-lg-8 col-xl-6">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Add New Student</h2>
+            <a href="{{ url_for('students.list_students') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to List</a>
+        </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" novalidate>
                     {{ form.hidden_tag() }}
                     
-                    <div class="mb-3">
-                        {{ form.roll_no.label(class="form-label") }}
-                        {{ form.roll_no(class="form-control") }}
-                        {% for error in form.roll_no.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    
-                    <div class="mb-3">
-                        {{ form.name.label(class="form-label") }}
-                        {{ form.name(class="form-control") }}
-                        {% for error in form.name.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            {{ form.age.label(class="form-label") }}
-                            {{ form.age(class="form-control") }}
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            {{ form.roll_no.label(class="form-label fw-semibold text-dark") }}
+                            {{ form.roll_no(class="form-control" + (" is-invalid" if form.roll_no.errors else "")) }}
+                            {% for error in form.roll_no.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.name.label(class="form-label fw-semibold text-dark") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% for error in form.name.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.age.label(class="form-label fw-semibold text-dark") }}
+                            {{ form.age(class="form-control" + (" is-invalid" if form.age.errors else "")) }}
                             {% for error in form.age.errors %}
-                                <div class="text-danger small">{{ error }}</div>
+                            <div class="invalid-feedback">{{ error }}</div>
                             {% endfor %}
                         </div>
-                        <div class="col-md-6">
-                            {{ form.marks.label(class="form-label") }}
-                            {{ form.marks(class="form-control") }}
-                            {% for error in form.marks.errors %}
-                                <div class="text-danger small">{{ error }}</div>
+                        
+                        <div class="col-md-8 mb-4">
+                            {{ form.course_id.label(class="form-label fw-semibold text-dark") }}
+                            {{ form.course_id(class="form-select" + (" is-invalid" if form.course_id.errors else "")) }}
+                            {% for error in form.course_id.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
                             {% endfor %}
                         </div>
                     </div>
                     
-                    <div class="mb-4">
-                        {{ form.course_id.label(class="form-label") }}
-                        {{ form.course_id(class="form-select") }}
-                        {% for error in form.course_id.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
+                    <hr class="my-4 text-muted opacity-25">
                     
-                    {{ form.submit(class="btn btn-primary") }}
+                    <div class="d-flex justify-content-end">
+                        <button type="reset" class="btn btn-light me-2">Clear</button>
+                        {{ form.submit(class="btn btn-primary px-4") }}
+                    </div>
                 </form>
             </div>
         </div>

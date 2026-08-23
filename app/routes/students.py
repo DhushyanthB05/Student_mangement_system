@@ -1,20 +1,36 @@
+﻿from app.routes.auth import admin_required
+import csv
+from io import StringIO
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app.extensions import db
 from app.models.models import Student, AcademicRecord, Course
 from app.forms import StudentForm
 from app.services.grade_service import calculate_grade
+from app.services.audit_service import log_action
 
 bp = Blueprint('students', __name__)
 
 @bp.route('/')
 @login_required
+@admin_required
 def list_students():
-    students = Student.query.all()
-    return render_template('students/list.html', students=students)
+    page = request.args.get('page', 1, type=int)
+    q = request.args.get('q', '')
+    
+    query = Student.query
+    if q:
+        query = query.filter(
+            (Student.name.ilike(f'%{q}%')) | 
+            (Student.roll_no.ilike(f'%{q}%'))
+        )
+        
+    pagination = query.paginate(page=page, per_page=10, error_out=False)
+    return render_template('students/list.html', pagination=pagination, q=q)
 
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_student():
     form = StudentForm()
     # Populate course choices
@@ -41,6 +57,7 @@ def add_student():
         db.session.add(record)
         db.session.commit()
 
+        log_action(f'Added student {student.name} ({student.roll_no})')
         flash('Student added successfully!', 'success')
         return redirect(url_for('students.list_students'))
         
@@ -48,6 +65,7 @@ def add_student():
 
 @bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_student(id):
     student = Student.query.get_or_404(id)
     form = StudentForm(obj=student)
@@ -72,6 +90,7 @@ def edit_student(id):
             student.academic_record.grade = calculate_grade(form.marks.data)
             
         db.session.commit()
+        log_action(f'Updated student {student.name} ({student.roll_no})')
         flash('Student updated successfully!', 'success')
         return redirect(url_for('students.list_students'))
 
@@ -79,10 +98,12 @@ def edit_student(id):
 
 @bp.route('/<int:id>/delete', methods=['POST'])
 @login_required
+@admin_required
 def delete_student(id):
     student = Student.query.get_or_404(id)
     db.session.delete(student)
     db.session.commit()
+    log_action(f'Deleted student {student.name} ({student.roll_no})')
     flash('Student deleted successfully!', 'success')
     return redirect(url_for('students.list_students'))
 
@@ -91,3 +112,60 @@ def delete_student(id):
 def student_profile(id):
     student = Student.query.get_or_404(id)
     return render_template('students/profile.html', student=student)
+
+
+
+@bp.route('/import', methods=['POST'])
+@login_required
+@admin_required
+def import_students():
+    if 'csv_file' not in request.files:
+        flash('No file uploaded.', 'danger')
+        return redirect(url_for('students.list_students'))
+        
+    file = request.files['csv_file']
+    if file.filename == '':
+        flash('No file selected.', 'danger')
+        return redirect(url_for('students.list_students'))
+        
+    if file and file.filename.endswith('.csv'):
+        try:
+            stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+            csv_input = csv.reader(stream)
+            next(csv_input) # Skip header
+            
+            count = 0
+            for row in csv_input:
+                if len(row) >= 5:
+                    roll_no, name, age, course_code, marks = row[:5]
+                    
+                    # Skip if student exists
+                    if Student.query.filter_by(roll_no=roll_no).first():
+                        continue
+                        
+                    # Find or create course if needed (simplified: just find)
+                    course = Course.query.filter_by(code=course_code).first()
+                    course_id = course.id if course else None
+                    
+                    student = Student(roll_no=roll_no, name=name, age=int(age), course_id=course_id)
+                    db.session.add(student)
+                    db.session.commit()
+                    
+                    m = int(marks)
+                    g = calculate_grade(m)
+                    record = AcademicRecord(student_id=student.id, marks=m, grade=g)
+                    db.session.add(record)
+                    count += 1
+            
+            db.session.commit()
+            log_action(f'Bulk imported {count} students via CSV')
+            flash(f'Successfully imported {count} students!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error importing CSV: {str(e)}', 'danger')
+    else:
+        flash('Invalid file format. Please upload a CSV.', 'danger')
+        
+    return redirect(url_for('students.list_students'))
+
+

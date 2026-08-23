@@ -1,6 +1,6 @@
 from app import create_app
 from app.extensions import db
-from app.models.models import User, Department, Course
+from app.models.models import User, Department, Course, Student, AcademicRecord
 
 app = create_app()
 
@@ -12,9 +12,9 @@ def init_db():
         db.create_all()
         
         # Create an initial admin user
-        if not User.query.filter_by(username='admin').first():
-            admin = User(username='admin')
-            admin.set_password('admin123')
+        if not User.query.filter_by(username='Dhushyanth B').first():
+            admin = User(username='Dhushyanth B')
+            admin.set_password('123456789')
             db.session.add(admin)
             
         # Create Dummy Departments and Courses
@@ -29,7 +29,24 @@ def init_db():
         db.session.add_all([c1, c2, c3])
         db.session.commit()
         
+                
+        # Create a dummy student user
+        if not User.query.filter_by(username='student1').first():
+            student_user = User(username='student1', role='student')
+            student_user.set_password('password123')
+            db.session.add(student_user)
+            db.session.commit()
+            
+            # Create a student profile for this user
+            student_profile = Student(roll_no='STU001', name='Test Student', age=20, course_id=c1.id, user_id=student_user.id)
+            db.session.add(student_profile)
+            db.session.commit()
+            
+            # Add marks
+            db.session.add(AcademicRecord(student_id=student_profile.id, marks=85, grade='B'))
+            db.session.commit()
         print('Initialized database, created admin user, and populated dummy departments/courses')
 
 if __name__ == '__main__':
     app.run(debug=True)
+

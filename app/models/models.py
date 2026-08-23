@@ -6,10 +6,9 @@ from datetime import datetime
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
-    role = db.Column(db.String(20), default='admin')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    username = db.Column(db.String(64), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+    role = db.Column(db.String(20), default='admin') # 'admin' or 'student'
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -39,8 +38,10 @@ class Student(db.Model):
     name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     
     # Linked records
+    user_account = db.relationship('User', backref='student_profile', uselist=False)
     academic_record = db.relationship('AcademicRecord', backref='student', uselist=False, cascade="all, delete-orphan")
     attendance_records = db.relationship('Attendance', backref='student', lazy=True, cascade="all, delete-orphan")
 
@@ -57,3 +58,12 @@ class Attendance(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(10), nullable=False) # 'Present', 'Absent'
+
+class AuditLog(db.Model):
+    __tablename__ = 'audit_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    action = db.Column(db.String(200), nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
+    
+    user = db.relationship('User', backref='audit_logs', lazy=True)

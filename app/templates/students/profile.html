@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom d-print-none">
     <h1 class="h2">Student Profile</h1>
     <div>
+        <button onclick="window.print()" class="btn btn-outline-dark me-2"><i class="bi bi-printer"></i> Print / Save PDF</button>
+        {% if current_user.role == 'admin' %}
         <a href="{{ url_for('students.edit_student', id=student.id) }}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
         <a href="{{ url_for('students.list_students') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to List</a>
+        {% endif %}
     </div>
+</div>
+
+<div class="d-none d-print-block text-center mb-4">
+    <h2>Official Academic Transcript</h2>
+    <p class="text-muted">Smart Student Management System</p>
+    <hr>
 </div>
 
 <div class="row">
