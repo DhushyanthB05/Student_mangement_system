@@ -54,7 +54,7 @@ A professional, production-ready Student Management System built with Python and
    `ash
    flask --app run run --debug
    `
-   Navigate to http://127.0.0.1:5000 in your browser.
+   Navigate to https://student-mangement-system-st10.onrender.com in your browser.
 
 ## 🔐 Default Credentials
 - **Admin Portal**: Username: Dhushyanth B | Password: 123456789
@@ -66,4 +66,4 @@ A professional, production-ready Student Management System built with Python and
 - **Database**: SQLite
 
 ---
-*Created by Dhushyanth B*
+*Developed by Dhushyanth B*
